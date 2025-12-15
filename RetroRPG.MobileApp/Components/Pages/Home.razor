@@ -1,0 +1,353 @@
+﻿@page "/"
+@using RetroRPG.Core.Models
+@using RetroRPG.Core.Services
+@using RetroRPG.Core.Data
+@inject CharacterRepository CharacterRepo
+@inject GameEngine GameEngine
+@inject NavigationManager Navigation
+
+<div class="game-screen">
+    @if (currentCharacter == null)
+    {
+        <!-- Character Selection/Creation -->
+        <div class="title-screen">
+            <pre class="ascii-art">
+    ╦═╗╔═╗╔╦╗╦═╗╔═╗  ╦═╗╔═╗╔═╗
+    ╠╦╝║╣  ║ ╠╦╝║ ║  ╠╦╝╠═╝║ ╦
+    ╩╚═╚═╝ ╩ ╩╚═╚═╝  ╩╚═╩  ╚═╝
+                </pre>
+
+            <h1 class="game-title">LEGEND OF THE AI DUNGEON</h1>
+
+            @if (existingCharacters.Any())
+            {
+                <div class="character-list">
+                    <h2>═══ SELECT CHARACTER ═══</h2>
+                    @foreach (var character in existingCharacters)
+                    {
+                        <div class="character-item" @onclick="() => LoadCharacter(character.Id)">
+                            <span class="char-name">@character.Name</span>
+                            <span class="char-info">Level @character.Level @character.Class</span>
+                        </div>
+                    }
+                </div>
+            }
+
+            <div class="new-character">
+                <h2>═══ CREATE NEW HERO ═══</h2>
+
+                @if (!showingStats)
+                {
+                    <input type="text" @bind="newCharacterName" placeholder="Enter name" class="retro-input" />
+
+                    <button class="retro-button" @onclick="RollStats">
+                        [ROLL ABILITY SCORES]
+                    </button>
+                }
+                else
+                {
+                    <div class="stats-display">
+                        <h3>@newCharacterName's Ability Scores</h3>
+
+                        <div class="stat-grid">
+                            <div class="stat-item">
+                                <span class="stat-name">STR:</span>
+                                <span class="stat-value">@rolledStats.Strength</span>
+                                <span class="stat-mod">(@GetModifierDisplay(rolledStats.Strength))</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-name">DEX:</span>
+                                <span class="stat-value">@rolledStats.Dexterity</span>
+                                <span class="stat-mod">(@GetModifierDisplay(rolledStats.Dexterity))</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-name">CON:</span>
+                                <span class="stat-value">@rolledStats.Constitution</span>
+                                <span class="stat-mod">(@GetModifierDisplay(rolledStats.Constitution))</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-name">INT:</span>
+                                <span class="stat-value">@rolledStats.Intelligence</span>
+                                <span class="stat-mod">(@GetModifierDisplay(rolledStats.Intelligence))</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-name">WIS:</span>
+                                <span class="stat-value">@rolledStats.Wisdom</span>
+                                <span class="stat-mod">(@GetModifierDisplay(rolledStats.Wisdom))</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-name">CHA:</span>
+                                <span class="stat-value">@rolledStats.Charisma</span>
+                                <span class="stat-mod">(@GetModifierDisplay(rolledStats.Charisma))</span>
+                            </div>
+                        </div>
+
+                        <div class="class-recommendation">
+                            <p>Recommended Classes:</p>
+                            <p class="recommended">@GetRecommendedClasses()</p>
+                        </div>
+
+                        <select @bind="selectedClass" class="retro-select">
+                            <option value="">Choose Class</option>
+                            @foreach (CharacterClass charClass in Enum.GetValues(typeof(CharacterClass)))
+                            {
+                                <option value="@charClass">@charClass</option>
+                            }
+                        </select>
+
+                        <div class="button-row">
+                            <button class="retro-button-half" @onclick="RollStats">
+                                [RE-ROLL]
+                            </button>
+                            <button class="retro-button-half" @onclick="CreateNewCharacter">
+                                [CREATE HERO]
+                            </button>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+    else
+    {
+        <!-- Game Interface -->
+        <div class="game-interface">
+            <!-- Status Bar -->
+            <div class="status-bar">
+                <div class="status-line">
+                    @currentCharacter.Name the @currentCharacter.Class |
+                    Level @currentCharacter.Level |
+                    HP: @currentCharacter.HitPoints/@currentCharacter.MaxHitPoints |
+                    Gold: @currentCharacter.Gold
+                </div>
+                <div class="location-line">
+                    Location: @currentCharacter.CurrentLocation
+                </div>
+            </div>
+
+            <!-- Narrative Display -->
+            <div class="narrative-display">
+                @foreach (var line in narrativeLines)
+                {
+                    <div class="narrative-line">@line</div>
+                }
+            </div>
+
+            <!-- Command Input -->
+            <div class="command-section">
+                <div class="command-prompt">
+                    <span class="prompt-symbol">&gt;</span>
+                    <input type="text"
+                           @bind="currentCommand"
+                           @onkeypress="HandleKeyPress"
+                           class="command-input"
+                           placeholder="What do you do?"
+                           autofocus />
+                </div>
+                <button class="submit-button" @onclick="SubmitCommand">
+                    [ENTER]
+                </button>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="quick-actions">
+                <button class="action-btn" @onclick='() => QuickCommand("look around")'>Look</button>
+                <button class="action-btn" @onclick='() => QuickCommand("check inventory")'>Inventory</button>
+                <button class="action-btn" @onclick='() => QuickCommand("check status")'>Status</button>
+                <button class="action-btn" @onclick="() => currentCharacter = null">Exit</button>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private Character? currentCharacter;
+    private List<Character> existingCharacters = new();
+    private string newCharacterName = "";
+    private CharacterClass selectedClass;
+    private string currentCommand = "";
+    private List<string> narrativeLines = new();
+    private bool isProcessing = false;
+    private bool showingStats = false;
+    private (int Strength, int Dexterity, int Constitution, int Intelligence, int Wisdom, int Charisma) rolledStats;
+
+    protected override void OnInitialized()
+    {
+        LoadExistingCharacters();
+    }
+
+    private void LoadExistingCharacters()
+    {
+        existingCharacters = CharacterRepo.GetAll();
+    }
+
+    private async void CreateNewCharacter()
+    {
+        if (string.IsNullOrWhiteSpace(newCharacterName) || selectedClass == 0)
+            return;
+
+        // Create character with rolled stats passed directly
+        if (showingStats)
+        {
+            currentCharacter = GameEngine.CreateCharacter(
+                newCharacterName,
+                selectedClass,
+                strength: rolledStats.Strength,
+                dexterity: rolledStats.Dexterity,
+                constitution: rolledStats.Constitution,
+                intelligence: rolledStats.Intelligence,
+                wisdom: rolledStats.Wisdom,
+                charisma: rolledStats.Charisma
+            );
+        }
+        else
+        {
+            // Fallback if no stats rolled (shouldn't happen now)
+            currentCharacter = GameEngine.CreateCharacter(newCharacterName, selectedClass);
+        }
+
+        narrativeLines.Add("═══════════════════════════════════════");
+        narrativeLines.Add($"Welcome, {currentCharacter.Name} the {currentCharacter.Class}!");
+        narrativeLines.Add($"STR: {currentCharacter.Strength} DEX: {currentCharacter.Dexterity} CON: {currentCharacter.Constitution}");
+        narrativeLines.Add($"INT: {currentCharacter.Intelligence} WIS: {currentCharacter.Wisdom} CHA: {currentCharacter.Charisma}");
+        narrativeLines.Add($"HP: {currentCharacter.HitPoints}/{currentCharacter.MaxHitPoints} AC: {currentCharacter.ArmorClass}");
+        narrativeLines.Add("Your adventure begins in the town square...");
+        narrativeLines.Add("═══════════════════════════════════════");
+        narrativeLines.Add("");
+        narrativeLines.Add("You stand in the bustling town square.");
+        narrativeLines.Add("The inn beckons to the north, while the");
+        narrativeLines.Add("dark forest looms to the east.");
+        narrativeLines.Add("");
+
+        // Reset for next character
+        showingStats = false;
+        newCharacterName = "";
+        selectedClass = 0;
+
+        StateHasChanged();
+    }
+
+   
+
+    private void LoadCharacter(string characterId)
+    {
+        currentCharacter = CharacterRepo.GetById(characterId);
+        if (currentCharacter != null)
+        {
+            narrativeLines.Add("═══════════════════════════════════════");
+            narrativeLines.Add($"Welcome back, {currentCharacter.Name}!");
+            narrativeLines.Add($"Level {currentCharacter.Level} {currentCharacter.Class}");
+            narrativeLines.Add($"STR: {currentCharacter.Strength} DEX: {currentCharacter.Dexterity} CON: {currentCharacter.Constitution}");
+            narrativeLines.Add($"INT: {currentCharacter.Intelligence} WIS: {currentCharacter.Wisdom} CHA: {currentCharacter.Charisma}");
+            narrativeLines.Add($"HP: {currentCharacter.HitPoints}/{currentCharacter.MaxHitPoints} AC: {currentCharacter.ArmorClass}");
+            narrativeLines.Add("═══════════════════════════════════════");
+            narrativeLines.Add("");
+        }
+    }
+
+    private async void SubmitCommand()
+    {
+        if (string.IsNullOrWhiteSpace(currentCommand) || currentCharacter == null || isProcessing)
+            return;
+
+        isProcessing = true;
+        var command = currentCommand;
+        currentCommand = "";
+
+        // Display player command
+        narrativeLines.Add($"> {command}");
+        narrativeLines.Add("");
+        StateHasChanged();
+
+        try
+        {
+            // Process through game engine
+            var response = await GameEngine.ProcessPlayerAction(currentCharacter.Id, command);
+
+            // Display AI response
+            var responseLines = response.Split('\n', StringSplitOptions.RemoveEmptyEntries);
+            foreach (var line in responseLines)
+            {
+                narrativeLines.Add(line);
+            }
+            narrativeLines.Add("");
+
+            // Keep only last 50 lines
+            if (narrativeLines.Count > 50)
+            {
+                narrativeLines = narrativeLines.Skip(narrativeLines.Count - 50).ToList();
+            }
+        }
+        catch (Exception ex)
+        {
+            narrativeLines.Add($"[Error: {ex.Message}]");
+        }
+        finally
+        {
+            isProcessing = false;
+            StateHasChanged();
+        }
+    }
+
+    private void QuickCommand(string command)
+    {
+        currentCommand = command;
+        SubmitCommand();
+    }
+
+    private void HandleKeyPress(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            SubmitCommand();
+        }
+    }
+    private void RollStats()
+    {
+        if (string.IsNullOrWhiteSpace(newCharacterName))
+        {
+            // Show error or just return
+            return;
+        }
+
+        // Roll 3d6 for each stat (classic D&D)
+        rolledStats = (
+            Strength: Roll3d6(),
+            Dexterity: Roll3d6(),
+            Constitution: Roll3d6(),
+            Intelligence: Roll3d6(),
+            Wisdom: Roll3d6(),
+            Charisma: Roll3d6()
+        );
+
+        showingStats = true;
+        StateHasChanged();
+    }
+
+    private int Roll3d6()
+    {
+        // Roll 3 six-sided dice
+        return Random.Shared.Next(1, 7) + Random.Shared.Next(1, 7) + Random.Shared.Next(1, 7);
+    }
+
+    private string GetModifierDisplay(int stat)
+    {
+        int modifier = (stat - 10) / 2;
+        return modifier >= 0 ? $"+{modifier}" : modifier.ToString();
+    }
+
+    private string GetRecommendedClasses()
+    {
+        var recommendations = new List<string>();
+
+        if (rolledStats.Strength >= 13) recommendations.Add("Warrior, Paladin");
+        if (rolledStats.Intelligence >= 13) recommendations.Add("Mage");
+        if (rolledStats.Dexterity >= 13) recommendations.Add("Rogue, Ranger");
+        if (rolledStats.Wisdom >= 13) recommendations.Add("Cleric, Ranger");
+        if (rolledStats.Charisma >= 13) recommendations.Add("Paladin, Rogue");
+
+        return recommendations.Any()
+            ? string.Join(", ", recommendations.Distinct())
+            : "Any class will work!";
+    }
+}

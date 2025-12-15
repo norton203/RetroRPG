@@ -1,0 +1,380 @@
+﻿/* Retro RPG Styles - LORD/BBS Inspired */
+
+:root {
+    --retro-bg: #000000;
+    --retro-fg: #00ff00;
+    --retro-accent: #ffff00;
+    --retro-border: #00aa00;
+    --retro-highlight: #ffffff;
+    --retro-shadow: #004400;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Courier New', 'Consolas', monospace;
+    background-color: var(--retro-bg);
+    color: var(--retro-fg);
+    line-height: 1.4;
+    overflow: hidden;
+}
+
+.retro-container {
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+}
+
+/* Title Screen */
+.title-screen {
+    padding: 20px;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.ascii-art {
+    color: var(--retro-accent);
+    text-align: center;
+    font-size: 0.8em;
+    margin-bottom: 10px;
+}
+
+.game-title {
+    text-align: center;
+    color: var(--retro-accent);
+    font-size: 1.2em;
+    margin-bottom: 30px;
+    text-shadow: 2px 2px var(--retro-shadow);
+}
+
+h2 {
+    color: var(--retro-accent);
+    text-align: center;
+    margin: 20px 0 10px 0;
+    font-size: 1em;
+}
+
+/* Character Selection */
+.character-list {
+    margin-bottom: 30px;
+}
+
+.character-item {
+    background: var(--retro-shadow);
+    border: 2px solid var(--retro-border);
+    padding: 10px;
+    margin: 10px 0;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    transition: all 0.2s;
+}
+
+    .character-item:hover,
+    .character-item:active {
+        background: var(--retro-border);
+        border-color: var(--retro-accent);
+        transform: translateX(5px);
+    }
+
+.char-name {
+    color: var(--retro-highlight);
+    font-weight: bold;
+}
+
+.char-info {
+    color: var(--retro-fg);
+}
+
+/* Input Elements */
+.retro-input,
+.retro-select {
+    width: 100%;
+    background: var(--retro-bg);
+    border: 2px solid var(--retro-border);
+    color: var(--retro-fg);
+    padding: 10px;
+    margin: 10px 0;
+    font-family: 'Courier New', monospace;
+    font-size: 1em;
+}
+
+    .retro-input:focus,
+    .retro-select:focus {
+        outline: none;
+        border-color: var(--retro-accent);
+        box-shadow: 0 0 10px var(--retro-border);
+    }
+
+.retro-button {
+    width: 100%;
+    background: var(--retro-shadow);
+    border: 2px solid var(--retro-border);
+    color: var(--retro-accent);
+    padding: 15px;
+    margin: 10px 0;
+    font-family: 'Courier New', monospace;
+    font-size: 1em;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.2s;
+}
+
+    .retro-button:hover,
+    .retro-button:active {
+        background: var(--retro-border);
+        transform: scale(1.05);
+    }
+
+/* Game Interface */
+.game-interface {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    padding: 10px;
+}
+
+.status-bar {
+    background: var(--retro-shadow);
+    border: 2px solid var(--retro-border);
+    padding: 10px;
+    margin-bottom: 10px;
+}
+
+.status-line {
+    color: var(--retro-accent);
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.location-line {
+    color: var(--retro-fg);
+}
+
+/* Narrative Display */
+.narrative-display {
+    flex: 1;
+    overflow-y: auto;
+    background: var(--retro-bg);
+    border: 2px solid var(--retro-border);
+    padding: 15px;
+    margin-bottom: 10px;
+    font-size: 0.95em;
+}
+
+.narrative-line {
+    margin-bottom: 5px;
+    color: var(--retro-fg);
+}
+
+/* Scrollbar styling */
+.narrative-display::-webkit-scrollbar {
+    width: 10px;
+}
+
+.narrative-display::-webkit-scrollbar-track {
+    background: var(--retro-bg);
+}
+
+.narrative-display::-webkit-scrollbar-thumb {
+    background: var(--retro-border);
+    border: 1px solid var(--retro-fg);
+}
+
+/* Command Section */
+.command-section {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.command-prompt {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    background: var(--retro-bg);
+    border: 2px solid var(--retro-border);
+    padding: 5px 10px;
+}
+
+.prompt-symbol {
+    color: var(--retro-accent);
+    font-weight: bold;
+    margin-right: 10px;
+    font-size: 1.2em;
+}
+
+.command-input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: var(--retro-fg);
+    font-family: 'Courier New', monospace;
+    font-size: 1em;
+    outline: none;
+}
+
+.submit-button {
+    background: var(--retro-shadow);
+    border: 2px solid var(--retro-border);
+    color: var(--retro-accent);
+    padding: 10px 20px;
+    font-family: 'Courier New', monospace;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+    .submit-button:active {
+        background: var(--retro-border);
+    }
+
+/* Quick Actions */
+.quick-actions {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+}
+
+.action-btn {
+    background: var(--retro-shadow);
+    border: 2px solid var(--retro-border);
+    color: var(--retro-fg);
+    padding: 10px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9em;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+    .action-btn:hover,
+    .action-btn:active {
+        background: var(--retro-border);
+        color: var(--retro-accent);
+        transform: translateY(-2px);
+    }
+
+/* Mobile Responsiveness */
+@media (max-width: 600px) {
+    .game-interface {
+        padding: 5px;
+    }
+
+    .quick-actions {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .ascii-art {
+        font-size: 0.6em;
+    }
+
+    .status-bar {
+        font-size: 0.85em;
+    }
+}
+
+/* Animations */
+@keyframes blink {
+    0%, 50% {
+        opacity: 1;
+    }
+
+    51%, 100% {
+        opacity: 0;
+    }
+}
+
+.command-input::after {
+    content: '█';
+    animation: blink 1s infinite;
+}
+
+/* Character Stats Display */
+.stats-display {
+    margin-top: 20px;
+}
+
+    .stats-display h3 {
+        color: var(--retro-highlight);
+        text-align: center;
+        margin-bottom: 20px;
+        font-size: 1.1em;
+    }
+
+.stat-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.stat-item {
+    background: var(--retro-shadow);
+    border: 2px solid var(--retro-border);
+    padding: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.stat-name {
+    color: var(--retro-accent);
+    font-weight: bold;
+    min-width: 40px;
+}
+
+.stat-value {
+    color: var(--retro-highlight);
+    font-weight: bold;
+    font-size: 1.2em;
+}
+
+.stat-mod {
+    color: var(--retro-fg);
+    font-size: 0.9em;
+}
+
+.class-recommendation {
+    background: var(--retro-shadow);
+    border: 2px solid var(--retro-border);
+    padding: 15px;
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+    .class-recommendation p {
+        margin: 5px 0;
+        color: var(--retro-fg);
+    }
+
+    .class-recommendation .recommended {
+        color: var(--retro-accent);
+        font-weight: bold;
+    }
+
+.button-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.retro-button-half {
+    background: var(--retro-shadow);
+    border: 2px solid var(--retro-border);
+    color: var(--retro-accent);
+    padding: 15px;
+    font-family: 'Courier New', monospace;
+    font-size: 1em;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.2s;
+}
+
+    .retro-button-half:hover,
+    .retro-button-half:active {
+        background: var(--retro-border);
+        transform: scale(1.05);
+    }

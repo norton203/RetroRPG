@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="RetoRPG.Api/RetoRPG.Api.csproj" />
+  <Project Path="RetroRPG.Core/RetroRPG.Core.csproj" />
+  <Project Path="RetroRPG.MobileApp/RetroRPG.MobileApp.csproj" />
+  <Project Path="RetroRPG.Shared/RetroRPG.Shared.csproj" />
+</Solution>
